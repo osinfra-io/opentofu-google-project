@@ -72,10 +72,6 @@ resource "google_compute_project_metadata_item" "enable_oslogin" {
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_crypto_key
 
 resource "google_kms_crypto_key" "cis_2_2_logging_sink" {
-
-  # See comment below for why we can't use the lifecycle block to prevent destroy on this resource.
-  # checkov:skip=CKV_GCP_82
-
   count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
 
   key_ring        = google_kms_key_ring.this.id
