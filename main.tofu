@@ -59,13 +59,13 @@ resource "google_billing_budget" "project" {
 # Enabling OS login binds SSH certificates to IAM users and facilitates effective SSH certificate management.
 
 resource "google_compute_project_metadata_item" "enable_oslogin" {
-  key     = "enable-oslogin"
-  project = google_project.this.project_id
-  value   = true
-
   depends_on = [
     google_project_service.this
   ]
+
+  key     = "enable-oslogin"
+  project = google_project.this.project_id
+  value   = true
 }
 
 # KMS Crypto Key Resource
@@ -96,13 +96,13 @@ resource "google_kms_crypto_key" "cis_2_2_logging_sink" {
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_key_ring
 
 resource "google_kms_key_ring" "this" {
-  location = var.key_ring_location
-  name     = "default"
-  project  = google_project.this.project_id
-
   depends_on = [
     google_project_service.this
   ]
+
+  location = var.key_ring_location
+  name     = "default"
+  project  = google_project.this.project_id
 }
 
 # KMS Crypto Key IAM Member Resource
@@ -140,14 +140,14 @@ resource "google_logging_metric" "cis_logging_metrics" {
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/logging_project_sink
 
 resource "google_logging_project_sink" "cis_2_2_logging_sink" {
+  depends_on = [
+    google_project_service.this
+  ]
+
   destination            = local.cis_2_2_logging_sink_storage_bucket
   name                   = "cis-2-2-logging-sink"
   project                = google_project.this.project_id
   unique_writer_identity = true
-
-  depends_on = [
-    google_project_service.this
-  ]
 }
 
 # Project Logging Bucket Config Resource

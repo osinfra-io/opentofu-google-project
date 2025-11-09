@@ -4,6 +4,12 @@
 locals {
   base_project_id = "${var.prefix}-${var.description}-${module.helpers.env}"
 
+  # Conditional Expressions
+  # https://opentofu.org/docs/language/expressions/conditionals
+
+  cis_2_2_logging_sink_project_id     = var.cis_2_2_logging_sink_project_id == "" ? google_project.this.project_id : var.cis_2_2_logging_sink_project_id
+  cis_2_2_logging_sink_storage_bucket = var.cis_2_2_logging_sink_project_id == "" ? "logging.googleapis.com/${google_logging_project_bucket_config.cis_2_2_logging_sink[0].name}" : "logging.googleapis.com/projects/${var.cis_2_2_logging_sink_project_id}/locations/${var.key_ring_location}/buckets/cis-2-2-logging-sink"
+
   # This map is used to create the GCP-CIS v1.3.0 logging metrics and alarms (2.4 - 2.11). It is recommended that metric filters and alarms be established for
   # the following resources.
 
@@ -70,12 +76,6 @@ locals {
     }
   }
 
-  # Conditional Expressions
-  # https://opentofu.org/docs/language/expressions/conditionals
-
-  cis_2_2_logging_sink_project_id     = var.cis_2_2_logging_sink_project_id == "" ? google_project.this.project_id : var.cis_2_2_logging_sink_project_id
-  cis_2_2_logging_sink_storage_bucket = var.cis_2_2_logging_sink_project_id == "" ? "logging.googleapis.com/${google_logging_project_bucket_config.cis_2_2_logging_sink[0].name}" : "logging.googleapis.com/projects/${var.cis_2_2_logging_sink_project_id}/locations/${var.key_ring_location}/buckets/cis-2-2-logging-sink"
-
   monitoring_notification_channels = {
     "budget" = {
       description   = "Budget notification channel created by the opentofu-google-project child module"
@@ -89,6 +89,7 @@ locals {
       email_address = var.security_notification_email
     }
   }
+
   # Format Function
   # https://opentofu.org/docs/language/functions/format
 
