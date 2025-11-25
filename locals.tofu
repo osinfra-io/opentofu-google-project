@@ -93,13 +93,7 @@ locals {
   # Format Function
   # https://opentofu.org/docs/language/functions/format
 
-  project_id = var.random_project_id ? format(
-    "%s-%s-%s-%s",
-    var.prefix,
-    var.description,
-    random_id.this[0].hex,
-    module.helpers.env,
-  ) : local.base_project_id
+  project_id = var.random_project_id ? format("%s-%s-%s-%s", var.prefix, var.description, random_id.this[0].hex, module.helpers.env) : local.base_project_id
 
   # Concat Function
   # https://opentofu.org/docs/language/functions/concat
