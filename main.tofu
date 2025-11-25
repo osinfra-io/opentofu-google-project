@@ -4,11 +4,11 @@
 data "google_logging_project_cmek_settings" "this" {
   count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
 
-  project = google_project.this.project_id
-
   depends_on = [
     google_project_service.this
   ]
+
+  project = google_project.this.project_id
 }
 
 # Billing Budget Resource
@@ -37,18 +37,18 @@ resource "google_billing_budget" "project" {
   display_name = "Monthly: ${google_project.this.project_id}"
 
   threshold_rules {
+    spend_basis       = "CURRENT_SPEND"
     threshold_percent = 0.50
-    spend_basis       = "CURRENT_SPEND"
   }
 
   threshold_rules {
+    spend_basis       = "CURRENT_SPEND"
     threshold_percent = 0.75
-    spend_basis       = "CURRENT_SPEND"
   }
 
   threshold_rules {
-    threshold_percent = 1.0
     spend_basis       = "CURRENT_SPEND"
+    threshold_percent = 1.0
   }
 }
 
@@ -59,13 +59,13 @@ resource "google_billing_budget" "project" {
 # Enabling OS login binds SSH certificates to IAM users and facilitates effective SSH certificate management.
 
 resource "google_compute_project_metadata_item" "enable_oslogin" {
-  key     = "enable-oslogin"
-  project = google_project.this.project_id
-  value   = true
-
   depends_on = [
     google_project_service.this
   ]
+
+  key     = "enable-oslogin"
+  project = google_project.this.project_id
+  value   = true
 }
 
 # KMS Crypto Key Resource
@@ -74,13 +74,7 @@ resource "google_compute_project_metadata_item" "enable_oslogin" {
 resource "google_kms_crypto_key" "cis_2_2_logging_sink" {
   count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
 
-  key_ring        = google_kms_key_ring.this.id
-  labels          = var.labels
-  name            = "cis-2-2-logging-sink"
-  rotation_period = "7776000s"
-
   # We can't use the lifecycle block to prevent destroy on this resource for testing purposes.
-
   # CryptoKeys cannot be deleted from Google Cloud Platform. Destroying a OpenTofu-managed CryptoKey will
   # remove it from state and delete all CryptoKeyVersions, rendering the key unusable, but will not delete
   # the resource from the project. When OpenTofu destroys these keys, any data previously encrypted with
@@ -90,19 +84,24 @@ resource "google_kms_crypto_key" "cis_2_2_logging_sink" {
   # lifecycle {
   #   prevent_destroy = true
   # }
+
+  key_ring        = google_kms_key_ring.this.id
+  labels          = var.labels
+  name            = "cis-2-2-logging-sink"
+  rotation_period = "7776000s"
 }
 
 # KMS Key Ring Resource
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_key_ring
 
 resource "google_kms_key_ring" "this" {
-  location = var.key_ring_location
-  name     = "default"
-  project  = google_project.this.project_id
-
   depends_on = [
     google_project_service.this
   ]
+
+  location = var.key_ring_location
+  name     = "default"
+  project  = google_project.this.project_id
 }
 
 # KMS Crypto Key IAM Member Resource
@@ -140,14 +139,14 @@ resource "google_logging_metric" "cis_logging_metrics" {
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/logging_project_sink
 
 resource "google_logging_project_sink" "cis_2_2_logging_sink" {
+  depends_on = [
+    google_project_service.this
+  ]
+
   destination            = local.cis_2_2_logging_sink_storage_bucket
   name                   = "cis-2-2-logging-sink"
   project                = google_project.this.project_id
   unique_writer_identity = true
-
-  depends_on = [
-    google_project_service.this
-  ]
 }
 
 # Project Logging Bucket Config Resource
@@ -184,8 +183,8 @@ resource "google_monitoring_alert_policy" "cis_logging_metrics" {
         per_series_aligner   = "ALIGN_DELTA"
       }
 
-      duration   = "0s"
       comparison = "COMPARISON_GT"
+      duration   = "0s"
       filter     = "metric.type=\"logging.googleapis.com/user/${each.key}\" AND resource.type=\"${each.value.resource_type}\""
     }
 
@@ -235,15 +234,14 @@ resource "google_monitoring_notification_channel" "this" {
 # Project Resource
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/google_project
 
+# CIS 3.1 Ensure that the default network does not exist in a project.
+# The default network has a pre-configured network configuration that is not suitable for production use.
+
 resource "google_project" "this" {
-
-  # CIS 3.1 Ensure that the default network does not exist in a project.
-  # The default network has a pre-configured network configuration that is not suitable for production use.
-
   auto_create_network = false
   billing_account     = var.billing_account
   deletion_policy     = var.deletion_policy
-  folder_id           = "folders/${var.folder_id}"
+  folder_id           = var.folder_id
   labels              = var.labels
   name                = local.project_id
   project_id          = local.project_id
@@ -256,9 +254,6 @@ resource "google_project" "this" {
 # It is recommended that Cloud Audit Logging is configured to track all admin activities and read, write access to user data.
 
 resource "google_project_iam_audit_config" "cis_2_1" {
-  project = google_project.this.project_id
-  service = "allServices"
-
   dynamic "audit_log_config" {
     for_each = toset(
       [
@@ -272,15 +267,17 @@ resource "google_project_iam_audit_config" "cis_2_1" {
       log_type = audit_log_config.key
     }
   }
+
+  project = google_project.this.project_id
+  service = "allServices"
 }
 
 # Project IAM Member Resource
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/google_project_iam
 
+# We do not need to add the role to the project if the log bucket and sync are in the same project.
+
 resource "google_project_iam_member" "cis_2_2" {
-
-  # We do not need to add the role to the project if the log bucket and sync are in the same project.
-
   count = var.cis_2_2_logging_sink_project_id == "" ? 0 : 1
 
   member  = google_logging_project_sink.cis_2_2_logging_sink.writer_identity
@@ -305,6 +302,6 @@ resource "google_project_service" "this" {
 resource "random_id" "this" {
   count = var.random_project_id ? 1 : 0
 
-  prefix      = "tf"
   byte_length = "1"
+  prefix      = "tf"
 }
