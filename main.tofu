@@ -110,6 +110,10 @@ resource "google_kms_key_ring" "this" {
 resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
   count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
 
+  lifecycle {
+    ignore_changes = [member]
+  }
+
   crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink[0].id
   member        = "serviceAccount:${data.google_logging_project_cmek_settings.this[0].service_account_id}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
