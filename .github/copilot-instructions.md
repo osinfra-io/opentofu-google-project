@@ -54,6 +54,17 @@ This ensures:
 - **Update deliberately** - When updating an action, update both the hash and the version comment
 - **Verify hashes** - Ensure the commit hash matches the tagged version you intend to use
 
+## Commit and PR Conventions
+
+- **No Conventional Commits** — do not prefix messages with `feat:`, `fix:`, `chore:`, `refactor:`, etc.
+- Write commit messages and PR titles in clear, natural language using sentence case.
+- Keep titles concise but descriptive.
+- Use GitHub labels (e.g., `enhancement`, `bug`, `refactor`, `docs`) to categorize PRs instead of encoding type in the title.
+- PR descriptions should explain what changed, why it changed, and any impact or migration considerations.
+
+✅ **Good:** `Improve metadata validation for GKE handler`
+❌ **Avoid:** `feat: add metadata endpoint`
+
 ## Repository Practices
 
 - Use symlinks for shared configuration files to avoid duplication.
