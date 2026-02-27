@@ -43,7 +43,7 @@ This ensures:
 
 ## GitHub Actions
 
-- Tests are run via `test.yml` on pull requests using the `osinfra-io/github-terraform-gcp-called-workflows` reusable called workflow.
+- Tests are run via `test.yml` on pull requests using the `osinfra-io/github-opentofu-gcp-called-workflows` reusable called workflow.
 - Releases are published via `release.yml` when a version tag (`v*.*.*`) is pushed.
 - All GitHub Actions must use commit hashes instead of version tags for security and reproducibility.
 
