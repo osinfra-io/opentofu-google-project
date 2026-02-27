@@ -1,8 +1,6 @@
 # <img align="left" width="45" height="45" src="https://user-images.githubusercontent.com/1610100/195462632-f70a64d6-7811-4da3-aa82-c65cbbb74754.png"> Google Cloud Platform - Project OpenTofu Module
 
-**[GitHub Actions](https://github.com/osinfra-io/opentofu-google-project/actions):**
-
-[![OpenTofu Tests](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml/badge.svg)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml) [![Dependabot](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml/badge.svg)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml)
+[![OpenTofu Tests](https://img.shields.io/github/actions/workflow/status/osinfra-io/opentofu-google-project/test.yml?branch=main&style=for-the-badge&logo=opentofu&label=OpenTofu%20Tests)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml) [![Dependabot](https://img.shields.io/github/actions/workflow/status/osinfra-io/opentofu-google-project/dependabot.yml?branch=main&style=for-the-badge&logo=github&label=Dependabot)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml)
 
 ## Repository Description
 
@@ -40,8 +38,8 @@ See the [documentation](https://docs.osinfra.io/fundamentals/development-setup) 
 
 ### 🛠️ Tools
 
-- [pre-commit](https://github.com/pre-commit/pre-commit)
 - [osinfra-pre-commit-hooks](https://github.com/osinfra-io/pre-commit-hooks)
+- [pre-commit](https://github.com/pre-commit/pre-commit)
 
 ### 📋 Skills and Knowledge
 

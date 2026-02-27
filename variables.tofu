@@ -4,7 +4,6 @@
 variable "billing_account" {
   description = "The alphanumeric ID of the billing account this project belongs to"
   type        = string
-  default     = "01C550-A2C86B-B8F16B"
 }
 
 variable "budget_notification_email" {
