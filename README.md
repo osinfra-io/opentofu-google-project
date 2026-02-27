@@ -1,12 +1,10 @@
 # <img align="left" width="45" height="45" src="https://user-images.githubusercontent.com/1610100/195462632-f70a64d6-7811-4da3-aa82-c65cbbb74754.png"> Google Cloud Platform - Project OpenTofu Module
 
-**[GitHub Actions](https://github.com/osinfra-io/opentofu-google-project/actions):**
-
-[![OpenTofu Tests](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml/badge.svg)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml) [![Dependabot](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml/badge.svg)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml)
+[![OpenTofu Tests](https://img.shields.io/github/actions/workflow/status/osinfra-io/opentofu-google-project/test.yml?style=for-the-badge&logo=opentofu&color=FEDA15&label=OpenTofu%20Tests)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/test.yml) [![Dependabot](https://img.shields.io/github/actions/workflow/status/osinfra-io/opentofu-google-project/dependabot.yml?style=for-the-badge&logo=github&color=2088FF&label=Dependabot)](https://github.com/osinfra-io/opentofu-google-project/actions/workflows/dependabot.yml)
 
 ## Repository Description
 
-OpenTofu **example** module for a Google Cloud Platform project.
+OpenTofu **example** module that creates a GCP project with CIS GCP Benchmark compliance controls, including audit log configuration (CIS 2.1), a KMS-encrypted log sink bucket (CIS 2.2), default network deletion (CIS 3.1), and OS Login enforcement (CIS 4.4). It configures a billing budget with threshold alerts and provisions Cloud Monitoring notification channels and alert policies for security events. GCP API enablement and project-level IAM are managed alongside the project lifecycle.
 
 > [!NOTE]
 > We do not recommend consuming this module like you might a [public module](https://search.opentofu.org). It is a baseline, something you can fork, potentially maintain, and modify to fit your organization's needs. Using public modules vs. writing your own has various [drivers and trade-offs](https://docs.osinfra.io/fundamentals/architecture-decision-records/adr-0003) that your organization should evaluate.
@@ -40,8 +38,8 @@ See the [documentation](https://docs.osinfra.io/fundamentals/development-setup) 
 
 ### 🛠️ Tools
 
-- [pre-commit](https://github.com/pre-commit/pre-commit)
 - [osinfra-pre-commit-hooks](https://github.com/osinfra-io/pre-commit-hooks)
+- [pre-commit](https://github.com/pre-commit/pre-commit)
 
 ### 📋 Skills and Knowledge
 

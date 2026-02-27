@@ -72,23 +72,37 @@ resource "google_compute_project_metadata_item" "enable_oslogin" {
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_crypto_key
 
 resource "google_kms_crypto_key" "cis_2_2_logging_sink" {
-  count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
+  lifecycle {
+    enabled = var.cis_2_2_logging_sink_project_id == ""
 
-  # We can't use the lifecycle block to prevent destroy on this resource for testing purposes.
-  # CryptoKeys cannot be deleted from Google Cloud Platform. Destroying a OpenTofu-managed CryptoKey will
-  # remove it from state and delete all CryptoKeyVersions, rendering the key unusable, but will not delete
-  # the resource from the project. When OpenTofu destroys these keys, any data previously encrypted with
-  # these keys will be irrecoverable. For this reason, it is strongly recommended that you add lifecycle
-  # hooks to the resource to prevent accidental destruction.
+    # We can't use the lifecycle block to prevent destroy on this resource for testing purposes.
+    # CryptoKeys cannot be deleted from Google Cloud Platform. Destroying a OpenTofu-managed CryptoKey will
+    # remove it from state and delete all CryptoKeyVersions, rendering the key unusable, but will not delete
+    # the resource from the project. When OpenTofu destroys these keys, any data previously encrypted with
+    # these keys will be irrecoverable. For this reason, it is strongly recommended that you add lifecycle
+    # hooks to the resource to prevent accidental destruction.
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+    # prevent_destroy = true
+  }
 
   key_ring        = google_kms_key_ring.this.id
   labels          = var.labels
   name            = "cis-2-2-logging-sink"
   rotation_period = "7776000s"
+}
+
+# KMS Crypto Key IAM Member Resource
+# https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member
+
+resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
+  lifecycle {
+    enabled        = var.cis_2_2_logging_sink_project_id == ""
+    ignore_changes = [member]
+  }
+
+  crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink.id
+  member        = "serviceAccount:${data.google_logging_project_cmek_settings.this[0].service_account_id}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
 # KMS Key Ring Resource
@@ -104,21 +118,6 @@ resource "google_kms_key_ring" "this" {
   project  = google_project.this.project_id
 }
 
-# KMS Crypto Key IAM Member Resource
-# https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member
-
-resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
-  count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
-
-  lifecycle {
-    ignore_changes = [member]
-  }
-
-  crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink[0].id
-  member        = "serviceAccount:${data.google_logging_project_cmek_settings.this[0].service_account_id}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-}
-
 # Logging Metric Resource
 # https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/logging_metric
 
@@ -129,6 +128,26 @@ resource "google_logging_metric" "cis_logging_metrics" {
   filter      = each.value.filter
   name        = each.key
   project     = google_project.this.project_id
+}
+
+# Project Logging Bucket Config Resource
+# https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/logging_project_bucket_config
+
+resource "google_logging_project_bucket_config" "cis_2_2_logging_sink" {
+  lifecycle {
+    enabled = var.cis_2_2_logging_sink_project_id == ""
+  }
+
+  bucket_id = "cis-2-2-logging-sink"
+
+  cmek_settings {
+    kms_key_name = google_kms_crypto_key.cis_2_2_logging_sink.id
+  }
+
+  location       = var.key_ring_location
+  locked         = var.cis_2_2_logging_bucket_locked
+  project        = google_project.this.project_id
+  retention_days = 30
 }
 
 # We disable _Default logging sink at the organization level to avoid duplicate logs
@@ -151,24 +170,6 @@ resource "google_logging_project_sink" "cis_2_2_logging_sink" {
   name                   = "cis-2-2-logging-sink"
   project                = google_project.this.project_id
   unique_writer_identity = true
-}
-
-# Project Logging Bucket Config Resource
-# https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/logging_project_bucket_config
-
-resource "google_logging_project_bucket_config" "cis_2_2_logging_sink" {
-  count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
-
-  bucket_id = "cis-2-2-logging-sink"
-
-  cmek_settings {
-    kms_key_name = google_kms_crypto_key.cis_2_2_logging_sink[0].id
-  }
-
-  location       = var.key_ring_location
-  locked         = var.cis_2_2_logging_bucket_locked
-  project        = google_project.this.project_id
-  retention_days = 30
 }
 
 # Monitoring Alert Policy Resource
@@ -282,7 +283,9 @@ resource "google_project_iam_audit_config" "cis_2_1" {
 # We do not need to add the role to the project if the log bucket and sync are in the same project.
 
 resource "google_project_iam_member" "cis_2_2" {
-  count = var.cis_2_2_logging_sink_project_id == "" ? 0 : 1
+  lifecycle {
+    enabled = var.cis_2_2_logging_sink_project_id != ""
+  }
 
   member  = google_logging_project_sink.cis_2_2_logging_sink.writer_identity
   project = local.cis_2_2_logging_sink_project_id
@@ -304,7 +307,9 @@ resource "google_project_service" "this" {
 # https://search.opentofu.org/provider/hashicorp/random/latest/docs/resources/id
 
 resource "random_id" "this" {
-  count = var.random_project_id ? 1 : 0
+  lifecycle {
+    enabled = var.random_project_id
+  }
 
   byte_length = "1"
   prefix      = "tf"
