@@ -89,6 +89,17 @@ git checkout main && git pull && git checkout -b <branch-name>
 - Use symlinks for shared configuration files to avoid duplication.
 - For OpenTofu-specific conventions (file structure, module pinning, resource patterns), refer to `.github/skills/opentofu.md`.
 
+### Before Starting Any Task
+
+Before making any changes, ensure all affected repositories are on `main` and in sync with `origin/main`:
+
+```bash
+git checkout main && git pull
+```
+
+- If a local branch already exists from a previous task, delete it before starting fresh
+- After a PR is merged, pull `main` and delete the local branch to stay clean
+
 ### Workspace Workflow Patterns
 
 - **Simultaneous multi-repo editing** - Apply standardization, updates, or patterns across all child module repos at once
