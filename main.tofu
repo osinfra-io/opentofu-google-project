@@ -3,7 +3,6 @@
 
 resource "google_project_service_identity" "logging" {
   provider = google-beta # Required for google_project_service_identity
-  count    = var.cis_2_2_logging_sink_project_id == "" ? 1 : 0
 
   depends_on = [
     google_project_service.this
@@ -103,7 +102,7 @@ resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
   }
 
   crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink.id
-  member        = try("serviceAccount:${google_project_service_identity.logging[0].email}", "serviceAccount:pending@pending.iam.gserviceaccount.com")
+  member        = try("serviceAccount:${google_project_service_identity.logging.email}", "serviceAccount:pending@pending.iam.gserviceaccount.com")
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
@@ -171,7 +170,7 @@ resource "google_logging_project_sink" "cis_2_2_logging_sink" {
   destination            = local.cis_2_2_logging_sink_storage_bucket
   name                   = "cis-2-2-logging-sink"
   project                = google_project.this.project_id
-  unique_writer_identity = true
+  unique_writer_identity = false
 }
 
 # Monitoring Alert Policy Resource
@@ -289,7 +288,7 @@ resource "google_project_iam_member" "cis_2_2" {
     enabled = var.cis_2_2_logging_sink_project_id != ""
   }
 
-  member  = coalesce(google_logging_project_sink.cis_2_2_logging_sink.writer_identity, "serviceAccount:pending@pending.iam.gserviceaccount.com")
+  member  = coalesce(google_project_service_identity.logging.member, "serviceAccount:pending@pending.iam.gserviceaccount.com")
   project = local.cis_2_2_logging_sink_project_id
   role    = "roles/logging.bucketWriter"
 }
