@@ -47,6 +47,18 @@ This ensures:
 - Releases are published via `release.yml` when a version tag (`v*.*.*`) is pushed.
 - All GitHub Actions must use commit hashes instead of version tags for security and reproducibility.
 
+### Creating Releases
+
+Always use `--generate-notes` so GitHub auto-generates release notes from merged PR titles using the `release.yml` changelog configuration:
+
+```bash
+gh release create <tag> --title "<tag>" --generate-notes --target main
+```
+
+- **Never write manual release notes** — the auto-generated format (🔨 Changes / 🔩 Dependencies categories) is the standard
+- Always pull `main` and create the branch from it before making changes
+- Bump the module ref in any consumer repos after the release is tagged
+
 ### Commit Hash Guidelines
 
 - **Use full 40-character SHA** - Never use short hashes; they can be ambiguous
