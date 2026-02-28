@@ -56,8 +56,15 @@ gh release create <tag> --title "<tag>" --generate-notes --target main
 ```
 
 - **Never write manual release notes** — the auto-generated format (🔨 Changes / 🔩 Dependencies categories) is the standard
-- Always pull `main` and create the branch from it before making changes
 - Bump the module ref in any consumer repos after the release is tagged
+
+### Branching Workflow
+
+Always `checkout main` and `git pull` before creating a new branch:
+
+```bash
+git checkout main && git pull && git checkout -b <branch-name>
+```
 
 ### Commit Hash Guidelines
 
