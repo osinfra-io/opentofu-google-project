@@ -103,7 +103,7 @@ resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
   }
 
   crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink.id
-  member        = "serviceAccount:${google_project_service_identity.logging[0].email}"
+  member        = try("serviceAccount:${google_project_service_identity.logging[0].email}", "serviceAccount:pending@pending.iam.gserviceaccount.com")
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
