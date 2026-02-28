@@ -6,6 +6,14 @@ mock_provider "google" {
   }
 }
 
+mock_provider "google-beta" {
+  mock_resource "google_project_service_identity" {
+    defaults = {
+      email = "service-mock@gcp-sa-logging.iam.gserviceaccount.com"
+    }
+  }
+}
+
 run "default" {
   command = apply
 
