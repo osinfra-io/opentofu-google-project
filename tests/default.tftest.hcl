@@ -4,6 +4,12 @@ mock_provider "google" {
       writer_identity = "serviceAccount:mock-cis-2-2-logging-sink@mock.iam.gserviceaccount.com"
     }
   }
+
+  mock_resource "google_project" {
+    defaults = {
+      number = "123456789"
+    }
+  }
 }
 
 mock_provider "google-beta" {

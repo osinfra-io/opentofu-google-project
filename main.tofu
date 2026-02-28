@@ -101,8 +101,10 @@ resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
     ignore_changes = [member]
   }
 
+  depends_on = [google_project_service_identity.logging]
+
   crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink.id
-  member        = try("serviceAccount:${google_project_service_identity.logging.email}", "serviceAccount:pending@pending.iam.gserviceaccount.com")
+  member        = "serviceAccount:service-${google_project.this.number}@gcp-sa-logging.iam.gserviceaccount.com"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
@@ -288,7 +290,9 @@ resource "google_project_iam_member" "cis_2_2" {
     enabled = var.cis_2_2_logging_sink_project_id != ""
   }
 
-  member  = coalesce(google_project_service_identity.logging.member, "serviceAccount:pending@pending.iam.gserviceaccount.com")
+  depends_on = [google_project_service_identity.logging]
+
+  member  = "serviceAccount:service-${google_project.this.number}@gcp-sa-logging.iam.gserviceaccount.com"
   project = local.cis_2_2_logging_sink_project_id
   role    = "roles/logging.bucketWriter"
 }
