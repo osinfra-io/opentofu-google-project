@@ -49,13 +49,11 @@ This ensures:
 
 ### Creating Releases
 
-Always use `--generate-notes` so GitHub auto-generates release notes from merged PR titles using the `release.yml` changelog configuration:
+Create a tag — the GitHub Actions release workflow does the rest (generates notes, publishes the release):
 
 ```bash
-gh release create <tag> --title "<tag>" --generate-notes --target main
+gh release create <tag>
 ```
-
-- **Never write manual release notes** — the auto-generated format (🔨 Changes / 🔩 Dependencies categories) is the standard
 - Bump the module ref in any consumer repos after the release is tagged
 
 ### Branching Workflow
