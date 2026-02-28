@@ -1,14 +1,16 @@
-# Logging Project CMEK Settings Data Source
-# https://search.opentofu.org/provider/hashicorp/google/latest/docs/datasources/logging_project_cmek_settings
+# Project Service Identity Resource
+# https://search.opentofu.org/provider/hashicorp/google/latest/docs/resources/project_service_identity
 
-data "google_logging_project_cmek_settings" "this" {
-  count = var.cis_2_2_logging_sink_project_id != "" ? 0 : 1
+resource "google_project_service_identity" "logging" {
+  provider = google-beta # Required for google_project_service_identity
+  count    = var.cis_2_2_logging_sink_project_id == "" ? 1 : 0
 
   depends_on = [
     google_project_service.this
   ]
 
   project = google_project.this.project_id
+  service = "logging.googleapis.com"
 }
 
 # Billing Budget Resource
@@ -101,7 +103,7 @@ resource "google_kms_crypto_key_iam_member" "cis_2_2_logging_sink" {
   }
 
   crypto_key_id = google_kms_crypto_key.cis_2_2_logging_sink.id
-  member        = "serviceAccount:${data.google_logging_project_cmek_settings.this[0].service_account_id}"
+  member        = "serviceAccount:${google_project_service_identity.logging[0].email}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
