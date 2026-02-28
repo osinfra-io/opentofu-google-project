@@ -4,19 +4,12 @@ mock_provider "google" {
       writer_identity = "serviceAccount:mock-cis-2-2-logging-sink@mock.iam.gserviceaccount.com"
     }
   }
-
-  mock_resource "google_project" {
-    defaults = {
-      number = "123456789"
-    }
-  }
 }
 
 mock_provider "google-beta" {
   mock_resource "google_project_service_identity" {
     defaults = {
-      email  = "service-mock@gcp-sa-logging.iam.gserviceaccount.com"
-      member = "serviceAccount:service-mock@gcp-sa-logging.iam.gserviceaccount.com"
+      email = "service-mock@gcp-sa-logging.iam.gserviceaccount.com"
     }
   }
 }
